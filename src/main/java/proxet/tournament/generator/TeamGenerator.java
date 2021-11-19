@@ -3,6 +3,7 @@ package proxet.tournament.generator;
 import proxet.tournament.generator.dto.Pair;
 import proxet.tournament.generator.dto.Player;
 import proxet.tournament.generator.dto.TeamGeneratorResult;
+import proxet.tournament.generator.exceptions.NotEnoughPlayersException;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -23,8 +24,9 @@ public class TeamGenerator {
             Arrays.fill(row, new Pair<>("", -1));
         try {
             Scanner in = new Scanner(new File(filePath));
-            while (in.hasNextLine()) {
-                Pair<String, Integer> temp = new Pair<>(in.next(), in.nextInt());
+            Pair<String, Integer> temp;
+            while (in.hasNext()) {
+                temp = new Pair<>(in.next(), in.nextInt());
                 int vehicleType = in.nextInt() - 1;
                 if (arr[vehicleType][0].getLast() < temp.getLast()) {
                     int i;
@@ -34,7 +36,11 @@ public class TeamGenerator {
                     arr[vehicleType][i - 1] = temp;
                 }
             }
-        } catch (FileNotFoundException e) {
+            for (int i = 0; i < 3; i++) {
+                if (arr[i][0].getLast() == -1)
+                    throw new NotEnoughPlayersException();
+            }
+        } catch (FileNotFoundException | NotEnoughPlayersException e) {
             e.printStackTrace();
         }
         List<Player> firstTeam = new ArrayList<>();
